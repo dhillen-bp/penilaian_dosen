@@ -11,7 +11,7 @@ Sistem menggunakan Framework Codeigneter 4.3.1 dengan persyaratan minimum yang h
 
 ## Installation
 
-1. Buat database dengan nama 'penilaian_dosen' dan import file [penilaian_dosen.sql](http://software.endy.muhardin.com/about)
+1. Buat database dengan nama 'penilaian_dosen' dan import file [penilaian_dosen.sql](https://github.com/dhillenbp179/penilaian_dosen/tree/main/public/assets)
 
 2. Jalankan program dengan cara, buka terminal dan masuk ke direktori folder penilaian_dosen lalu ketikkan perintah berikut:
 
