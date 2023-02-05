@@ -45,6 +45,18 @@
                             <p>Data Kuesioner</p>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="<?= base_url('/admin/data_admin')  ?>" class="nav-link">
+                            <i class="fa fa-table nav-icon"></i>
+                            <p>Data Admin</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="<?= base_url('/admin/data_matkul')  ?>" class="nav-link">
+                            <i class="fa fa-table nav-icon"></i>
+                            <p>Data Matkul</p>
+                        </a>
+                    </li>
                 <?php endif ?>
                 <?php if (session()->get('level') == 'dosen') : ?>
                     <li class="nav-item">

@@ -38,13 +38,7 @@
                         <p>Penilaian Dosen</p>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="<?= base_url('/mahasiswa/dosen_terbaik')  ?>" class="nav-link">
-                        <i class="fa fa-list nav-icon"></i>
-                        <p>Daftar Dosen Terbaik</p>
-                    </a>
-                </li>
-                </li>
+
             </ul>
         </nav>
         <!-- /.sidebar-menu -->

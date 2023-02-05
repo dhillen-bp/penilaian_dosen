@@ -8,6 +8,9 @@ class Login extends BaseController
 {
     public function index()
     {
+        if (session()->get('logged_in') == true) {
+            return redirect()->to(base_url('mahasiswa/index'));
+        }
         helper(['form']);
         echo view('login');
     }

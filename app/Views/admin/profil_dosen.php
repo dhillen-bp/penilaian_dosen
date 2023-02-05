@@ -12,7 +12,7 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="index?page=">Home</a></li>
+                        <li class="breadcrumb-item"><a href="<?= base_url('/admin/profil_dosen')  ?>">Home</a></li>
                         <li class="breadcrumb-item active">Profil Dosen</li>
                     </ol>
                 </div>
@@ -80,12 +80,11 @@
                                 <!-- Post -->
                                 <div class="card-body">
                                     <?php foreach ($kuesioners as $kuesioner) : ?>
-                                        <div class="post">
+                                        <div class="post clearfix">
                                             <div class="user-block">
                                                 <img class="img-circle img-bordered-sm" src="<?= base_url('assets/img/book.png'); ?>" alt="user image">
                                                 <span class="username">
                                                     <span class="text text-info">Mata Kuliah : <?= $kuesioner['kd_matkul']; ?></span>
-                                                    <button type="button" class="float-right btn btn-tool" data-card-widget="collapse"><i class="fas fa-times"></i></button>
                                                 </span>
                                                 <span class="description">Tahun Ajaran <?= $kuesioner['id_angkatan']; ?></span>
                                             </div>

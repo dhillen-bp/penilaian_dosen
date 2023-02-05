@@ -45,9 +45,7 @@
                 <li class="nav-item d-none d-sm-inline-block">
                     <a href="<?= base_url('/mahasiswa/nilai_dosen')  ?>" class="nav-link">Penilaian Dosen</a>
                 </li>
-                <li class="nav-item d-none d-sm-inline-block">
-                    <a href="<?= base_url('/mahasiswa/dosen_terbaik')  ?>" class="nav-link">Daftar Dosen Terbaik</a>
-                </li>
+
             </ul>
 
             <!-- Right navbar links -->

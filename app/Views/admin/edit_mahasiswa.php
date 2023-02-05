@@ -12,7 +12,7 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="<?= base_url(); ?>/admin/data_mahasiswa">Data Mahasiswa</a></li>
+                        <li class="breadcrumb-item"><a href="<?= base_url('/admin/data_mahasiswa')  ?>">Data Mahasiswa</a></li>
                         <li class="breadcrumb-item active">Tambah Mahasiswa</li>
                     </ol>
                 </div>

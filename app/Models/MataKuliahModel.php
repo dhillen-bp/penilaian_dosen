@@ -14,5 +14,5 @@ class MataKuliahModel extends Model
     protected $returnType     = 'array';
     // protected $useSoftDeletes = true;
 
-    protected $allowedFields = ['kd_matkul', 'nm_matkul'];
+    protected $allowedFields = ['kd_matkul', 'nm_matkul', 'id_angkatan', 'semester', 'id_dosen'];
 }

@@ -7,6 +7,10 @@ use App\Models\AdminModel;
 use App\Models\DosenModel;
 use App\Models\PenilaianDosenModel;
 use App\Models\AngkatanModel;
+use App\Models\MataKuliahModel;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Reader\Csv;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 
 class Admin extends BaseController
 {
@@ -448,6 +452,111 @@ class Admin extends BaseController
         return redirect()->to('admin/data_admin');
     }
 
+    public function data_matkul()
+    {
+        $session = session();
+        if ($session->get('logged_in_admin') !== TRUE && $session->get('level') !== 'admin') {
+            return redirect()->to(base_url('admin/index'));
+        } else if ($session->get('logged_in_admin') == TRUE && $session->get('level') !== 'admin') {
+            return redirect()->to(base_url('admin/profil_dosen'));
+        }
+        $matkulModel = new MataKuliahModel();
+        $data = [
+            'title' => 'Data Matkul',
+            'matkuls' => $matkulModel->findAll()
+        ];
+        echo view('admin/data_matkul', $data);
+    }
+
+    public function tambah_matkul()
+    {
+        $session = session();
+        if ($session->get('logged_in_admin') !== TRUE && $session->get('level') !== 'admin') {
+            return redirect()->to(base_url('admin/index'));
+        } else if ($session->get('logged_in_admin') == TRUE && $session->get('level') !== 'admin') {
+            return redirect()->to(base_url('admin/profil_dosen'));
+        }
+        // lakukan validasi
+        $validation =  \Config\Services::validation();
+        $validation->setRules(['id_matkul' => 'required']);
+        $isDataValid = $validation->withRequest($this->request)->run();
+
+        // jika data valid, simpan ke database
+        if ($isDataValid) {
+            $matkulModel = new MataKuliahModel();
+            $matkulModel->save([
+                "kd_matkul" => $this->request->getVar('kd_matkul'),
+                "nm_matkul" => $this->request->getVar('nm_matkul'),
+                "id_angkatan" => $this->request->getVar('id_angkatan'),
+                "semester" => $this->request->getVar('semester'),
+                "id_dosen" => $this->request->getVar('id_dosen'),
+            ]);
+
+            return redirect()->to('admin/data_matkul');
+        }
+        $dosenModel = new DosenModel();
+        $angkatanModel = new AngkatanModel();
+        $data = [
+            'title'  => "Tambah Mata Kuliah",
+            'dosens' => $dosenModel->findAll(),
+            'angkatans' => $angkatanModel->findAll(),
+        ];
+        // tampilkan form create
+        echo view('admin/tambah_matkul', $data);
+    }
+
+    public function edit_matkul($id)
+    {
+        $session = session();
+        if ($session->get('logged_in_admin') !== TRUE && $session->get('level') !== 'admin') {
+            return redirect()->to(base_url('admin/index'));
+        } else if ($session->get('logged_in_admin') == TRUE && $session->get('level') !== 'admin') {
+            return redirect()->to(base_url('admin/profil_dosen'));
+        }
+        $matkulModel = new MataKuliahModel();
+        $dosenModel = new DosenModel();
+        $angkatanModel = new AngkatanModel();
+        $data = [
+            'title' => 'Edit Matkul',
+            'matkul' => $matkulModel->where('kd_matkul', $id)->first(),
+            'dosens' => $dosenModel->findAll(),
+            'angkatans' => $angkatanModel->findAll(),
+        ];
+
+        // lakukan validasi
+        $validation =  \Config\Services::validation();
+        $validation->setRules(['id_matkul' => 'required']);
+        $isDataValid = $validation->withRequest($this->request)->run();
+
+        // jika data valid, simpan ke database
+        // jika data valid, simpan ke database
+        if ($isDataValid) {
+            $matkulModel = new MataKuliahModel();
+            $matkulModel->save([
+                "kd_matkul" => $this->request->getVar('kd_matkul'),
+                "nm_matkul" => $this->request->getVar('nm_matkul'),
+                "id_angkatan" => $this->request->getVar('id_angkatan'),
+                "semester" => $this->request->getVar('semester'),
+                "id_dosen" => $this->request->getVar('id_dosen'),
+            ]);
+            return redirect()->to('admin/data_matkul');
+        }
+
+        return view('admin/edit_matkul', $data);
+    }
+
+    public function hapus_matkul($id)
+    {
+        $matkulModel = new MataKuliahModel();
+        // cari gambar berdasarkan id
+        $matkul = $matkulModel->find($id);
+
+        $matkulModel->delete($id);
+        $getID = $matkul['kd_matkul'];
+        session()->setFlashdata('msg', "Data $getID  berhasil dihapus.");
+        return redirect()->to('admin/data_matkul');
+    }
+
     public function profil_dosen()
     {
         $session = session();
@@ -481,7 +590,7 @@ class Admin extends BaseController
             'title' => 'Profil Dosen',
             'dosens' => $dosenModel->where('nidn', $nidn)->first(),
             'kuesioners' =>  $kuesionerModel->where('id_dosen', $nidn)->find(),
-            'rating' => $totalRating,
+            'rating' => round($totalRating, 2),
             'labelChart' => $label,
             'dataset' => $dataChart
         ];
@@ -503,5 +612,48 @@ class Admin extends BaseController
             $sumSosial = $kuesionerModel->select("sum(sosial) as p4")->where('id_dosen', $nidn)->where('id_angkatan', $tahun)->first();
             return (((float) $sumPedagogik['p1'] / $numRows) + ((float) $sumProfesional['p2'] / $numRows) + ((float) $sumKepribadian['p3'] / $numRows) + ((float) $sumSosial['p4'] / $numRows)) / 4;
         }
+    }
+
+    public function import_excel()
+    {
+        $file_excel = $this->request->getFile('fileexcel');
+        $ext = $file_excel->getClientExtension();
+        if ($ext == 'xls') {
+            $render = new \PhpOffice\PhpSpreadsheet\Reader\Xls();
+        } else {
+            $render = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+        }
+        $spreadsheet = $render->load($file_excel);
+
+        $data = $spreadsheet->getActiveSheet()->toArray();
+        foreach ($data as $x => $row) {
+            if ($x == 0) {
+                continue;
+            }
+
+            $nim = $row[0];
+            $nama = $row[1];
+            $tahunMasuk = $row[2];
+            $username = $row[3];
+            $password = $row[4];
+
+            $db = \Config\Database::connect();
+
+            $cekNim = $db->table('mahasiswa')->getWhere(['nim' => $nim])->getResult();
+
+            if (count($cekNim) > 0) {
+                session()->setFlashdata('msg', '<b style="color:red">Data Gagal di Import NIM ada yang sama</b>');
+            } else {
+
+                $simpandata = [
+                    'nim' => $nim, 'nama' => $nama, 'tahun_masuk' => $tahunMasuk, 'username' => $username, 'password' => password_hash($password, PASSWORD_DEFAULT),
+                ];
+
+                $db->table('mahasiswa')->insert($simpandata);
+                session()->setFlashdata('message', 'Berhasil import excel');
+            }
+        }
+
+        return redirect()->to(base_url('admin/data_mahasiswa'));
     }
 }
