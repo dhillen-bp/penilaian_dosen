@@ -27,6 +27,27 @@ Sistem menggunakan Framework Codeigneter 4.3.1 dengan persyaratan minimum yang h
 5. Buka browser dan ketikkan http://localhost:8080 pada url browser dan akan tampil halaman login sistem tersebut.
    ![halaman login mahasiswa](https://github.com/dhillenbp179/penilaian_dosen/blob/main/public/assets/ss/2_menjalankan_pertama.png "halaman login mahasiswa")
 6. Untuk menjalankan aplikasi perlu login sebagai berikut:
-* mahasiswa => username = user dan password = user
-* admin => username = admin dan password = admin
-* dosen => username = dosen dan password = dosen
+- mahasiswa => username = user dan password = user
+- admin => username = admin dan password = admin
+- dosen => username = dosen dan password = dosen
+
+
+## Authors
+
+- Anik Ismiwati (2013010164)
+- Dhillen Brahmantya Pradifta (2013010179)
+- Dwi Setiaji (2013010152)
+- Latifah Nur Fitriana (2013010158)
+
+
+## Features
+### Mahasiswa
+- Melihat Data Dosen
+- Melihat Rating Dosen
+- Mengisi kuesioner penilaian dosen
+
+### Admin
+- Melakukan CRUD Data Mahasiswa, Data Dosen, Data Admin, dan Kuesioner
+- Untuk Data Mahasiswa sudah bisa import file excel dengan format xlsx atau xls
+### Dosen
+- Melihat hasil rating, pesan dan kesan kuesioner yang diberikan kepada dosen yg login.
