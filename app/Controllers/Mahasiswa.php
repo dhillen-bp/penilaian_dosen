@@ -34,20 +34,20 @@ class Mahasiswa extends BaseController
         $dosenModel = new DosenModel();
         $angkatanModel = new AngkatanModel();
         $matkulModel = new MataKuliahModel();
-        $kuesionerModel = new PenilaianDosenModel();
+        $sessionID = session()->get('nim');
+        $kdMatkul = $this->request->getPost('kd_matkul');
+        $idDosen = $this->request->getPost('id_dosen');
         // lakukan validasi
         $validation =  \Config\Services::validation();
         $validation->setRules(['id_dosen' => 'required']);
         $isDataValid = $validation->withRequest($this->request)->run();
         // jika data valid, simpan ke database
-
         if ($isDataValid) {
             $penilaianModel = new PenilaianDosenModel();
-            $sessionID = session()->get('nim');
-            $dosenDanMatkulFilter = $kuesionerModel->query("SELECT id_dosen, kd_matkul, id_mahasiswa, COUNT(*) duplikat FROM kuesioner WHERE id_mahasiswa = '$sessionID' GROUP BY id_dosen, kd_matkul, id_mahasiswa HAVING COUNT(duplikat) = 1");
-            $numRowsDuplikat = $dosenDanMatkulFilter->getNumRows();
-            if ($numRowsDuplikat > 1) {
-                $session->setFlashdata('msg', 'Anda Telah Melakukan Penilaian Dosen!');
+            // $dosenDanMatkulFilter = $kuesionerModel->query("SELECT id_dosen, kd_matkul, id_mahasiswa, COUNT(*) duplikat FROM kuesioner WHERE id_mahasiswa = '$sessionID' GROUP BY id_dosen, kd_matkul, id_mahasiswa HAVING COUNT(duplikat) = 1");
+            // $numRowsDuplikat = $dosenDanMatkulFilter->getNumRows();
+            if ($dosenModel->getDuplikat($sessionID, $idDosen, $kdMatkul)) {
+                $session->setFlashdata('msg', 'Anda Telah Melakukan Penilaian Dosen! Penilaian hanya bisa Sekali');
                 return redirect()->to('mahasiswa/nilai_dosen');
             } else {
                 $penilaianModel->insert([
@@ -102,7 +102,7 @@ class Mahasiswa extends BaseController
 
         $angkatanModel = new AngkatanModel();
         $label = $angkatanModel->findColumn('tahun_ajar');
-        $dataChart = [$this->getAvg($label[0], $nidn), $this->getAvg($label[1], $nidn), $this->getAvg($label[2], $nidn), $this->getAvg($label[3], $nidn), $this->getAvg($label[4], $nidn), $this->getAvg($label[5], $nidn), $this->getAvg($label[6], $nidn)];
+        $dataChart = [$this->getAvg($label[0], $nidn), $this->getAvg($label[1], $nidn), $this->getAvg($label[2], $nidn), $this->getAvg($label[3], $nidn), $this->getAvg($label[4], $nidn), $this->getAvg($label[5], $nidn), $this->getAvg($label[6], $nidn), $this->getAvg($label[7], $nidn)];
 
         $data = [
             'title' => 'Detail Dosen',
@@ -114,40 +114,40 @@ class Mahasiswa extends BaseController
         echo view('mahasiswa/detail_dosen', $data);
     }
 
-    public function dosen_terbaik()
-    {
-        $session = session();
-        $dosenModel = new DosenModel();
-        $joinDosen = $dosenModel->joinDosenKuesioner()->getResultArray();
+    // public function dosen_terbaik()
+    // {
+    //     $session = session();
+    //     $dosenModel = new DosenModel();
+    //     $joinDosen = $dosenModel->joinDosenKuesioner()->getResultArray();
 
-        foreach ($joinDosen as $dosen) {
-            $nidn = $dosen['id_dosen'];
-            $kuesionerModel = new PenilaianDosenModel();
-            // $sumPedagogik = $kuesionerModel->selectSum('pedagogik', 'p1')->where('id_dosen', $nidn);
-            $query = $kuesionerModel->query("SELECT * FROM kuesioner JOIN dosen ON dosen.nidn = kuesioner.id_dosen WHERE kuesioner.id_dosen = '001'");
+    //     foreach ($joinDosen as $dosen) {
+    //         $nidn = $dosen['id_dosen'];
+    //         $kuesionerModel = new PenilaianDosenModel();
+    //         // $sumPedagogik = $kuesionerModel->selectSum('pedagogik', 'p1')->where('id_dosen', $nidn);
+    //         $query = $kuesionerModel->query("SELECT * FROM kuesioner JOIN dosen ON dosen.nidn = kuesioner.id_dosen WHERE kuesioner.id_dosen = '001'");
 
-            $numRows = $query->getNumRows();
-            $sumPedagogik = $kuesionerModel->select('sum(pedagogik) as p1')->where('id_dosen', $nidn)->first();
-            $sumProfesional = $kuesionerModel->select('sum(profesional) as p2')->where('id_dosen', $nidn)->first();
-            $sumKepribadian = $kuesionerModel->select('sum(kepribadian) as p3')->where('id_dosen', $nidn)->first();
-            $sumSosial = $kuesionerModel->select('sum(sosial) as p4')->where('id_dosen', $nidn)->first();
+    //         $numRows = $query->getNumRows();
+    //         $sumPedagogik = $kuesionerModel->select('sum(pedagogik) as p1')->where('id_dosen', $nidn)->first();
+    //         $sumProfesional = $kuesionerModel->select('sum(profesional) as p2')->where('id_dosen', $nidn)->first();
+    //         $sumKepribadian = $kuesionerModel->select('sum(kepribadian) as p3')->where('id_dosen', $nidn)->first();
+    //         $sumSosial = $kuesionerModel->select('sum(sosial) as p4')->where('id_dosen', $nidn)->first();
 
-            if ($numRows < 1) {
-                $rating = "Belum Ada Nilai";
-            } else {
-                $rating = (((float) $sumPedagogik['p1'] / $numRows) + ((float) $sumProfesional['p2'] / $numRows) + ((float) $sumKepribadian['p3'] / $numRows) + ((float) $sumSosial['p4'] / $numRows)) / 4;
-                $rating = round($rating, 2);
-            }
-            $totalRating[3] = [$rating, $rating, $rating];
-        }
+    //         if ($numRows < 1) {
+    //             $rating = "Belum Ada Nilai";
+    //         } else {
+    //             $rating = (((float) $sumPedagogik['p1'] / $numRows) + ((float) $sumProfesional['p2'] / $numRows) + ((float) $sumKepribadian['p3'] / $numRows) + ((float) $sumSosial['p4'] / $numRows)) / 4;
+    //             $rating = round($rating, 2);
+    //         }
+    //         $totalRating[3] = [$rating, $rating, $rating];
+    //     }
 
-        $data = [
-            'title' => 'Daftar Dosen Terbaik',
-            'dosens' => $dosenModel->findAll(),
-            'rating' => $rating
-        ];
-        echo view('mahasiswa/dosen_terbaik', $data);
-    }
+    //     $data = [
+    //         'title' => 'Daftar Dosen Terbaik',
+    //         'dosens' => $dosenModel->findAll(),
+    //         'rating' => $rating
+    //     ];
+    //     echo view('mahasiswa/dosen_terbaik', $data);
+    // }
 
     public function getAvg($tahun, $nidn)
     {
