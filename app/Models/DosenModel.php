@@ -24,4 +24,11 @@ class DosenModel extends Model
         $builder->join('kuesioner', 'dosen.nidn = kuesioner.id_dosen');
         return $builder->get();
     }
+
+    public function getDuplikat($sessionID, $idDosen, $kdMatkul)
+    {
+        $db = \Config\Database::connect();
+        $sql = "SELECT id_dosen, kd_matkul, id_mahasiswa, COUNT(*) duplikat FROM kuesioner WHERE id_mahasiswa = '$sessionID' AND id_dosen = '$idDosen' AND kd_matkul = '$kdMatkul' GROUP BY id_dosen, kd_matkul, id_mahasiswa HAVING COUNT(duplikat) >= 1";
+        return $db->query($sql)->getResultArray();
+    }
 }
